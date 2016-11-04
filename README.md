@@ -34,6 +34,7 @@ https://coreos.com/kubernetes/docs/latest/
 - [Single-Node Vagrant Stack](single-node/README.md)
 - [Multi-Node Vagrant Cluster](multi-node/vagrant/README.md)
 - [Multi-Node Bare Metal Cluster](Documentation/kubernetes-on-baremetal.md)
+- [Ceph RBD Example](Documentation/ceph-rbd.md)
 
 ## Running Kubernetes Conformance Tests
 
