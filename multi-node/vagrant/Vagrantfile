@@ -17,6 +17,10 @@ $worker_vm_memory = 2048
 $etcd_count = 1
 $etcd_vm_memory = 512
 $node_disk_sizes = [4, 5, 6] # size in GB of each disk
+$public_gateway = ENV['GATEWAY']
+$public_prefix = ENV['NETWORK']
+$public_start = ENV['START_RANGE'].to_i
+$bridge_if = ENV['BRIDGE_IF']
 
 CONFIG = File.expand_path("config.rb")
 if File.exist?(CONFIG)
@@ -44,6 +48,10 @@ end
 
 def workerIP(num)
   return "172.17.4.#{num+200}"
+end
+
+def publicIP(num)
+  return $public_prefix + "." + (num + $public_start).to_s
 end
 
 controllerIPs = [*1..$controller_count].map{ |i| controllerIP(i) } <<  CONTROLLER_CLUSTER_IP
@@ -204,8 +212,13 @@ Vagrant.configure("2") do |config|
       end
 
       workerIP = workerIP(i)
+      publicIP = publicIP(i)
       worker.vm.network :private_network, ip: workerIP
+      worker.vm.network "public_network", bridge: $bridge_if, ip: publicIP
 
+      # default router
+      config.vm.provision "shell", run: "always", inline: "route add default gw " + $public_gateway
+      
       attach_volumes(worker, $node_disk_sizes)
 
       provisionMachineSSL(worker,"worker","kube-worker-#{workerIP}",[workerIP])
